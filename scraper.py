@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 
 
-cols = ['venue', 'horse', 'pos', 'total']
+cols = ['venue', 'horse', 'pos', 'total', 'odds-d', 'odds-f']
 master_df = pd.DataFrame(columns = cols)
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
@@ -37,17 +37,21 @@ for t in results_titles:
 
 	# locate sequential listing of horses, in the order of finishing
 	horses = soup.select('.rp-jockeytrainer-show > .rp-horse')
+	odds_dec  = list(soup.select('.rp-result-bsp-show > .price-decimal'))
+	odds_frac = list(soup.select('.rp-result-bsp-show > .price-fractional'))
+
 
 	position = 0
 	for h in horses:
 		d = {}
+		d['odds-d'] = float(odds_dec[position].text)
+		d['odds-f'] = odds_frac[position].text
 		position += 1
 		d['pos'] = position
 		d['total'] = len(horses)
 		d['venue'] = '|'.join(race[-5:-2])
 		# strip the horse's number from the name
 		d['horse'] = re.split('\s', h.text, 1)[1]
-
 
 		rows.append(d)
 	
@@ -59,4 +63,4 @@ for t in results_titles:
 print()
 print('\n ALL RESULTS\n')	
 
-print(tabulate(master_df, headers = cols, tablefmt='psql', showindex = False))
+print(tabulate(master_df, headers = cols, tablefmt='psql', showindex = True))
