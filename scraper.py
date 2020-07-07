@@ -16,9 +16,9 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
 summary_urls = [
-    'https://www.timeform.com/horse-racing/results/2020-06-10/',
-    'https://www.timeform.com/horse-racing/results/2020-06-11/',
-    'https://www.timeform.com/horse-racing/results/2020-06-12/',
+    # 'https://www.timeform.com/horse-racing/results/2020-06-10/',
+    # 'https://www.timeform.com/horse-racing/results/2020-06-11/',
+    # 'https://www.timeform.com/horse-racing/results/2020-06-12/',
     'https://www.timeform.com/horse-racing/results/2020-06-13/'
 ]
 
@@ -96,7 +96,7 @@ def main():
 
         detail_urls = get_day_summary(summary_url)
 
-        for url in list(detail_urls):
+        for url in list(detail_urls)[0:5]:
 
             try:
 
@@ -104,13 +104,11 @@ def main():
                 df = get_races(url)
                 print(tabulate(df, headers=cols, tablefmt='psql', showindex=False))
 
-                master_df = master_df.append(df, ignore_index=True)
-
-                strategy.apply(master_df)
+                strategy.apply(df)
                 strategy.print()
 
             except Exception as e:
-                print('Failed to read data from', url)
+                print('Failed to read data from', url, str(e))
 
     print()
 

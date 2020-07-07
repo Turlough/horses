@@ -12,6 +12,7 @@ class Strategy(ABC):
 
 
 class AlwaysFavouriteStrategy(Strategy):
+
     betting_history = []
     favourites = []
     winners = []
@@ -21,6 +22,7 @@ class AlwaysFavouriteStrategy(Strategy):
     mean_take = 0
 
     def apply(self, races):
+
         # filter to favourites
         self.favourites = races[races.favourite == 1]
         # bet one unit on each favourite
