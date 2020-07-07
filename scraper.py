@@ -4,6 +4,7 @@ import re
 import pandas as pd
 from tabulate import tabulate
 from minimiser import Minimiser
+from strategy import AlwaysFavouriteStrategy
 import matplotlib.pyplot as plt
 
 cols = ['venue', 'horse', 'pos', 'ran', 'odds', 'favourite']
@@ -13,9 +14,9 @@ headers = {
 
 summary_urls = [
     'https://www.timeform.com/horse-racing/results/2020-06-10/',
-    'https://www.timeform.com/horse-racing/results/2020-06-11/',
-    'https://www.timeform.com/horse-racing/results/2020-06-12/',
-    'https://www.timeform.com/horse-racing/results/2020-06-13/'
+    # 'https://www.timeform.com/horse-racing/results/2020-06-11/',
+    # 'https://www.timeform.com/horse-racing/results/2020-06-12/',
+    # 'https://www.timeform.com/horse-racing/results/2020-06-13/'
 ]
 
 
@@ -83,43 +84,18 @@ def scrape_summary(summary_url):
     return summary_df
 
 
-def analyse(df, history):
-    # filter to favourites
-    favourites = df[df.favourite == 1]
-    # bet one unit on each favourite
-    amount_spent = len(favourites)
-    # filter again to favourites that won
-    winners = favourites[favourites.pos == 1]
-    # add the money returned
-    amount_returned = winners.odds.sum()
-    # profit
-    profit = amount_returned - amount_spent
-    # % gain or loss on total spent so far
-    mean_take = 100 * (amount_returned / amount_spent - 1)
-
-    history.append(mean_take)
-
-    print(f'''
-    Spent           {amount_spent}
-    Gained          {amount_returned:.2f}
-    Profit          {profit:.2f}
-    Profit %        {mean_take:.1f}%
-    ''')
-
-    return history
-
-
 def main():
     master_df = pd.DataFrame(columns=cols)
 
     history = []
+    strategy = AlwaysFavouriteStrategy()
     for summary_url in summary_urls:
         print()
         print(summary_url)
 
         detail_urls = get_day_summary(summary_url)
 
-        for url in list(detail_urls):
+        for url in list(detail_urls)[0:5]:
 
             try:
 
@@ -128,7 +104,8 @@ def main():
                 print(tabulate(df, headers=cols, tablefmt='psql', showindex=False))
 
                 master_df = master_df.append(df, ignore_index=True)
-                history = analyse(master_df, history)
+                history = strategy.apply(master_df)
+                strategy.print()
 
             except Exception as e:
                 print('Failed to read data from', url)
