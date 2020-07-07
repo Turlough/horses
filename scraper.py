@@ -7,6 +7,9 @@ from minimiser import Minimiser
 from strategy import AlwaysFavouriteStrategy
 import matplotlib.pyplot as plt
 
+
+strategy = AlwaysFavouriteStrategy()
+
 cols = ['venue', 'horse', 'pos', 'ran', 'odds', 'favourite']
 
 headers = {
@@ -14,9 +17,9 @@ headers = {
 
 summary_urls = [
     'https://www.timeform.com/horse-racing/results/2020-06-10/',
-    # 'https://www.timeform.com/horse-racing/results/2020-06-11/',
-    # 'https://www.timeform.com/horse-racing/results/2020-06-12/',
-    # 'https://www.timeform.com/horse-racing/results/2020-06-13/'
+    'https://www.timeform.com/horse-racing/results/2020-06-11/',
+    'https://www.timeform.com/horse-racing/results/2020-06-12/',
+    'https://www.timeform.com/horse-racing/results/2020-06-13/'
 ]
 
 
@@ -87,15 +90,13 @@ def scrape_summary(summary_url):
 def main():
     master_df = pd.DataFrame(columns=cols)
 
-    history = []
-    strategy = AlwaysFavouriteStrategy()
     for summary_url in summary_urls:
         print()
         print(summary_url)
 
         detail_urls = get_day_summary(summary_url)
 
-        for url in list(detail_urls)[0:5]:
+        for url in list(detail_urls):
 
             try:
 
@@ -104,7 +105,8 @@ def main():
                 print(tabulate(df, headers=cols, tablefmt='psql', showindex=False))
 
                 master_df = master_df.append(df, ignore_index=True)
-                history = strategy.apply(master_df)
+
+                strategy.apply(master_df)
                 strategy.print()
 
             except Exception as e:
@@ -118,10 +120,7 @@ def main():
     df = master_df[predicate]
     print(tabulate(df, headers=cols, tablefmt='psql', showindex=True))
 
-    plt.plot(history)
-    plt.axhline(y=0)
-    plt.show()
-    print('Num items in history:', len(history))
+    strategy.plot()
 
 
 if __name__ == "__main__":
